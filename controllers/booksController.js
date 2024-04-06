@@ -46,6 +46,7 @@ class booksController {
   getOneBook = async (req, res) => {
     try {
       const { bookId } = req.params;
+      console.log("Ver uno", bookId);
       const bookDoc = await db.collection("books").doc(bookId).get();
 
       if (!bookDoc.exists) {
@@ -90,6 +91,7 @@ class booksController {
   deleteBook = async (req, res) => {
     try {
       const { bookId } = req.params;
+      console.log("BOOKID", bookId);
       const docRef = db.collection("books").doc(bookId);
 
       const doc = await docRef.get();

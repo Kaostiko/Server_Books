@@ -11,12 +11,12 @@ router.post("/", booksController.createBook);
 router.get("/", booksController.getAllBooks);
 
 // Devuelve los detalles de un libro específico segun id
-router.get("/:book_id", booksController.getOneBook);
+router.get("/:bookId", booksController.getOneBook);
 
 // Actualiza la información de un libro por su id
-router.put("/:book_id", booksController.updateBook);
+router.put("/:bookId", booksController.updateBook);
 
 //Elimina un libro según su id
-router.delete("/:book_id", booksController.deleteBook);
+router.delete("/:bookId", booksController.deleteBook);
 
 module.exports = router;
