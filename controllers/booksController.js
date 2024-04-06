@@ -30,26 +30,80 @@ class booksController {
   };
 
   getAllBooks = async (req, res) => {
-    // res.send("Estoy en books todos");
-    const snapshot = await db.collection("books").get();
-    snapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data());
-    });
+    try {
+      const snapshot = await db.collection("books").get();
+      const books = [];
+      snapshot.forEach((doc) => {
+        books.push({ id: doc.id, ...doc.data() });
+      });
+      return res.status(200).json(books);
+    } catch (error) {
+      console.error("Error al obtener todos los libros:", error);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
   };
 
-  getOneBook = (req, res) => {
-    const book_id = req.params;
-    res.send(`Información completa del libro con is: ${book_id}`);
+  getOneBook = async (req, res) => {
+    try {
+      const { bookId } = req.params;
+      const bookDoc = await db.collection("books").doc(bookId).get();
+
+      if (!bookDoc.exists) {
+        return res.status(404).json({ error: "Libro no encontrado" });
+      }
+
+      const bookData = bookDoc.data();
+      return res.status(200).json(bookData);
+    } catch (error) {
+      console.error("Error al obtener el libro:", error);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
   };
 
-  updateBook = (req, res) => {
-    const book_id = req.params;
-    res.send(`Actualizar la información del libro: ${book_id}`);
+  updateBook = async (req, res) => {
+    const { book_id } = req.params;
+    const { titulo, autor, estilo, sinopsis } = req.body;
+
+    try {
+      const bookRef = db.collection("books").doc(book_id);
+      const updatedFields = {};
+
+      // Añadir los campos que se quieren actualizar al objeto
+      if (titulo) updatedFields.titulo = titulo;
+      if (autor) updatedFields.autor = autor;
+      if (estilo) updatedFields.estilo = estilo;
+      if (sinopsis) updatedFields.sinopsis = sinopsis;
+
+      // Realizar la actualización
+      await bookRef.update(updatedFields);
+
+      // Respuesta de éxito
+      return res
+        .status(200)
+        .json({ message: "Libro actualizado correctamente" });
+    } catch (error) {
+      console.error("Error al actualizar el libro:", error);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
   };
 
-  deleteBook = (req, res) => {
-    const book_id = req.params;
-    res.send(`Borrar libro concreto con id: ${book_id}`);
+  deleteBook = async (req, res) => {
+    try {
+      const { bookId } = req.params;
+      const docRef = db.collection("books").doc(bookId);
+
+      const doc = await docRef.get();
+      if (!doc.exists) {
+        return res.status(404).json({ error: "Libro no encontrado" });
+      }
+
+      await docRef.delete();
+      console.log("Libro eliminado:", bookId);
+      return res.status(200).json({ message: "Libro eliminado correctamente" });
+    } catch (error) {
+      console.error("Error al eliminar el libro:", error);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
   };
 }
 
